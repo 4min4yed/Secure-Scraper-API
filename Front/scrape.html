@@ -6,12 +6,66 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Scraper</h1>
-    <h2>Welcome $name</h2>
-    <h3>Please enter the link of the page you want to scrape</h3>
-    <form action="/scrape.html" method="post">
-        <label for="url">URL:</label>
-        <input type="url" id="url" name="url" required><br><br>
-        <button type="submit">Scrape</button>
+    <h1>Scrape Results</h1>
+    <form id="scrapeForm">
+        <label for="urlInput">Enter job keyword:</label>
+        <input type="text" id="urlInput" name="urlInput" required>
+        <button type="submit">Search </button>
+        <h6>Only EY job searching is available.. for now</h6>
+    </form>
+    <div id="results"></div>
+
+    
+    <script>
+        const scrapeForm = document.getElementById('scrapeForm');
+
+        scrapeForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior:reloading page
+
+            const jobKeyword = document.getElementById('urlInput').value;
+
+            const data = {
+                keyword: jobKeyword
+            };
+
+            fetch('http://localhost:8080/scrape', {
+                method: 'POST', 
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data), 
+            })
+            .then(response => response.json()) 
+            .then(data => {             // fetch(...).then(response => response.json()) sends and recieves response from FastAPI backend
+    console.log('Success:', data);
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+
+    if(data.results.length === 0){
+        resultsDiv.innerHTML = "<p>No jobs found.</p>";
+        return;
+    }
+
+    data.results.forEach(job => {
+        const jobCard = document.createElement("div");
+        jobCard.innerHTML = `
+            <h3>${job.JobTitle}</h3>
+            <p><a href="${job.JobURL}" target="_blank">Job Page</a></p>
+            <p><a href="${job['Apply here']}" target="_blank">Apply Here</a></p>
+            <hr>
+        `;
+        resultsDiv.appendChild(jobCard);
+    });
+})
+
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while sending data.');
+            });
+        });
+    </script>
+
+
+
 </body>
 </html>

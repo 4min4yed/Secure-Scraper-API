@@ -1,0 +1,1 @@
+print("Corporate Security Job Details | EY".removesuffix("Job Details | EY"))
